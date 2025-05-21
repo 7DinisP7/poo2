@@ -29,10 +29,17 @@ public class Main {
     private static final String TIME_TRAVEL = "No time travelling!";
     private static final String NOTE_EXISTS = "%s already exists!";
     private static final String NOTE_ADDED = "Note %s was created successfully with links to %d notes.\n";
+    private static final String NOTE_CONTENT = "%s: %s - %d links. %s tags.\n";
+    private static final String NOTE_NOT_EXISTS = "Note %s does not exist!\n";
+    private static final String INVALID_DOC_DATE = "Invalid document date!";
+    private static final String TIME_TRAVEL_FUTURE = "No time traveling to the future!";
+
+    private static final String PERMANENT = "permanent";
+    private static final String LITERARY = "literary";
 
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        SecondBrainApp scApp = new SecondBrainClass();
+        SecondBrainApp scApp = new SecondBrainAppClass();
         executeCommand(sc, scApp);
         sc.close();
     }
@@ -47,8 +54,10 @@ public class Main {
                     System.out.println(BYE);
                 }
                 case HELP -> executeHelp();
-                case CREATE -> createPermanentNote(in, scApp);
+                case CREATE -> executeCreate(in, scApp);
+                case READ -> executeRead(in, scApp);
                 case NOTES -> listPermanentNotes(in, scApp);
+                case TAG -> executeTag(in, scApp);
                 default -> System.out.println(UNKNOWN);
             }
 
@@ -64,19 +73,64 @@ public class Main {
         }
     }
 
-    /**
-     * Creates a new permanent note.
-     * @param in
-     * @param scApp
-     */
-    private static void createPermanentNote(Scanner in, SecondBrainApp scApp) {
+    public static void executeCreate(Scanner in, SecondBrainApp scApp ) {
         String type = in.next().toLowerCase();
+        switch(type){
+            case PERMANENT -> createPermanentNote(in, scApp, type);
+            case LITERARY -> createLiteraryNote(in, scApp, type);
+        }
+    }
+
+    /**
+     * Creates a new literary note.
+     * @param in the scanner to read the user input.
+     * @param scApp the system class.
+     * @param type the type of note (in this case, literary).
+     */
+    private static void createLiteraryNote(Scanner in, SecondBrainApp scApp, String type) {
         int year = in.nextInt();
         int month = in.nextInt();
         int day = in.nextInt();
         in.nextLine();
-        String id = in.nextLine();
-        String content = in.nextLine();
+        String noteID = in.nextLine().trim();
+        String content = in.nextLine().trim();
+        String author = in.nextLine().trim();
+        int docYear = in.nextInt();
+        int docMonth = in.nextInt();
+        int docDay = in.nextInt();
+        in.nextLine();
+        String url = in.nextLine().trim();
+        String quote = in.nextLine().trim();
+        try{
+            scApp.createLiteraryNote(type, year, month, day, noteID, content, author, docYear, docMonth,
+                    docDay, url, quote);
+            System.out.printf(NOTE_ADDED,noteID, 0);
+        } catch (DateTimeException e){
+            System.out.println(INVALID_DATE);
+        } catch(InvalidDocDateException e){
+            System.out.println(INVALID_DOC_DATE);
+        } catch (DatePreceedsException e){
+            System.out.println(TIME_TRAVEL);
+        } catch (NoteAlreadyExistsException e){
+            System.out.println(NOTE_EXISTS);
+        } catch (DocDateExceedsException e){
+            System.out.println(TIME_TRAVEL_FUTURE);
+        }
+    }
+
+    /**
+     * Creates a new permanent note.
+     * @param in the scanner to read the user input.
+     * @param scApp the system class.
+     * @param type the type of note (in this case, permanent).
+     */
+    private static void createPermanentNote(Scanner in, SecondBrainApp scApp, String type) {
+        int year = in.nextInt();
+        int month = in.nextInt();
+        int day = in.nextInt();
+        in.nextLine();
+        String id = in.nextLine().trim();
+        String content = in.nextLine().trim();
         try{
             scApp.createPermanentNote(type, year, month, day, id, content);
             System.out.printf(NOTE_ADDED, id, 0);
@@ -91,16 +145,22 @@ public class Main {
 
     /**
      * Executes the command "read".
+     * @param in the scanner to read the user input.
+     * @param scApp the system class.
      */
-    private void executeRead(Scanner in, SecondBrainApp scApp) {
+    private static void executeRead(Scanner in, SecondBrainApp scApp) {
         String noteId = in.nextLine().trim();
-
+        try{
+            System.out.printf(NOTE_CONTENT, noteId, scApp.getNoteContent(noteId), 0, 0);
+        } catch (NoteDoesntExistException e) {
+            System.out.printf(NOTE_NOT_EXISTS, noteId);
+        }
     }
 
     /**
      * Lists all permanent notes.
-     * @param in
-     * @param scApp
+     * @param in the scanner to read the user input
+     * @param scApp the system call
      */
     private static void listPermanentNotes(Scanner in, SecondBrainApp scApp) {
         String type = in.nextLine().trim().toLowerCase();
@@ -118,4 +178,14 @@ public class Main {
             System.out.println(note.getType());
         }
     }
+
+   private static void executeTag(Scanner in, SecondBrainApp scApp) {
+       String noteId = in.nextLine().trim();
+
+
+
+
+    }
+
+
 }

@@ -26,14 +26,24 @@ public interface SecondBrainApp {
             DocDateExceedsException;
 
     /**
-     * Gets a note by its ID
+     * Gets a note´s content by its ID
      * @param noteID the ID of the note
-     * @return the note with the ID
+     * @return the note´s content
      */
-    Note getNoteByID(String noteID) throws NoteDoesntExistException;
+    String getNoteContent(String noteID) throws NoteDoesntExistException;
 
     /**
      * The iterator for all permanent notes.
      */
     Iterator<Note> permanentIterator();
+
+    /**
+     * Adds tag to a note
+     * @param noteId  The note that is going to be tagged
+     * @param tagId   Tag to be added
+     * @throws NoteDoesntExistException  If note doesn't exist
+     * @throws NoteAlreadyTaggedException  If note is already tagged
+     */
+    void createTag(String noteId, String tagId) throws NoteDoesntExistException, NoteAlreadyTaggedException;
+
 }
